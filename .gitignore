@@ -1,0 +1,18 @@
+# Entorno local de desarrollo y mantenimiento de la skill (Privado en PC)
+.agents/
+.agent/
+.claude/
+.cursor/
+.gemini/
+context/
+GEMINI.md
+AGENTS.md
+CLAUDE.md
+skills-lock.json
+
+# Sistema operativo, editores y variables de entorno
+.DS_Store
+Thumbs.db
+*.log
+.env
+.vscode/
