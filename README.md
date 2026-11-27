@@ -31,7 +31,7 @@ Una vez instalada, invoca la acción que necesites mediante comando corto o leng
 | `/multi-agent-architect init`<br>*(acción por defecto)* | *"Usa `multi-agent-architect` para configurar este proyecto"* | **Inicialización en un solo paso sin pausas:** detecta tu proveedor y modelos activos, respeta el stack actual de tu proyecto y genera toda la orquestación y memoria en segundo plano. |
 | `/multi-agent-architect models` | *"Con `multi-agent-architect` actualiza los modelos de mis agentes"* | Revisa si tu proveedor tiene modelos nuevos o más eficientes, hace un balance capacidad/consumo, actualiza los agentes que lo requieran y reporta los cambios. |
 | `/multi-agent-architect stack` | *"Con `multi-agent-architect` sugiere mejoras para mi stack"* | Muestra una comparativa entre tu stack actual y mejoras técnicas opcionales (con su justificación). Solo aplica cambios si los apruebas. |
-| `/multi-agent-architect skills` | *"Con `multi-agent-architect` recomiéndame skills para este proyecto"* | Sugiere skills públicas verificadas acordes a las tecnologías de tu proyecto con sus enlaces oficiales para instalar bajo confirmación. |
+| `/multi-agent-architect skills` | *"Con `multi-agent-architect` recomiéndame skills para este proyecto"* | Enfoque híbrido: recomienda skills estándar universales + busca en internet skills específicas para tu stack con enlaces oficiales para instalar bajo confirmación. |
 
 ---
 
@@ -47,6 +47,24 @@ tu-proyecto/
 └── .agents/
     ├── agents/                    # Subagentes especializados con model y fallback_model
     └── skills/                    # Skills de dominio extraídas de las reglas de tu proyecto
+```
+
+---
+
+## 📂 Estructura del Repositorio
+
+```text
+multi-agent-architect/
+├── .github/workflows/skills-maintenance.yml      # Auditoría semanal automática de vigencia de skills
+├── LICENSE                                       # Licencia MIT
+├── README.md                                     # Documentación general
+└── skills/
+    └── multi-agent-architect/
+        ├── SKILL.md                              # Especificación y flujo de las 4 acciones
+        └── references/
+            ├── reglas-enrutamiento-dinamico.md   # Clasificación en 4 Tiers y balance de modelos
+            ├── skills-estandar.md                # Catálogo curado de skills estándar universales
+            └── moldes-orquestacion.md            # Plantillas de memoria en doble capa y subagentes
 ```
 
 ---

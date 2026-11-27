@@ -10,9 +10,10 @@ AGENTS.md
 CLAUDE.md
 skills-lock.json
 
-# Sistema operativo, editores y variables de entorno
+# Sistema operativo, editores, reportes temporales y variables de entorno
 .DS_Store
 Thumbs.db
 *.log
 .env
 .vscode/
+maintenance-report.md

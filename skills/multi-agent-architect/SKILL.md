@@ -7,7 +7,8 @@ description: >-
   orchestration in a single uninterrupted pass respecting the project's current stack,
   (2) 'models' to audit and rebalance agent models when new provider models appear,
   (3) 'stack' to compare the current stack against optional technical improvements,
-  and (4) 'skills' to recommend curated community skills with official links.
+  and (4) 'skills' for hybrid skill recommendations combining core standardized skills
+  with live ecosystem search for the project's specific stack.
 ---
 
 # `multi-agent-architect` — Orquestación Multiagente e Ingeniería de Contexto
@@ -23,7 +24,7 @@ Identifica qué acción solicita el desarrollador (ya sea mediante comando corto
 | **`init`** *(Por defecto)* | `/multi-agent-architect` o `/multi-agent-architect init` | *"Configura / inicializa la orquestación de este proyecto"* | Genera toda la orquestación de principio a fin en **un solo proceso sin pausas**, respetando el stack actual del proyecto. |
 | **`models`** | `/multi-agent-architect models` | *"Actualiza / mejora los modelos de mis agentes"* | Consulta los modelos actuales del proveedor, evalúa si hay modelos nuevos o mejores y actualiza los agentes explicando cada cambio. |
 | **`stack`** | `/multi-agent-architect stack` | *"Analiza o sugiere mejoras de stack para mi proyecto"* | Compara el stack actual del proyecto frente a mejoras opcionales recomendadas y aplica solo las que el usuario apruebe. |
-| **`skills`** | `/multi-agent-architect skills` | *"Recomiéndame skills para este proyecto"* | Sugiere skills públicas verificadas del catálogo curado con sus enlaces oficiales para instalar bajo confirmación. |
+| **`skills`** | `/multi-agent-architect skills` | *"Recomiéndame skills para este proyecto"* | Combina skills estándar universales + búsqueda en vivo para el stack del proyecto, entregando enlaces oficiales para instalar bajo confirmación. |
 
 ---
 
@@ -33,10 +34,10 @@ Identifica qué acción solicita el desarrollador (ya sea mediante comando corto
 > *(Única excepción: si el directorio está completamente vacío y el usuario pide crear un proyecto desde cero / Greenfield, aplica primero la Fase 1 de consultoría descrita en [`./references/moldes-orquestacion.md`](./references/moldes-orquestacion.md)).*
 
 ### Pasos de Ejecución Continua (`init`):
-1. **Reconocimiento Autónomo (Vía Subagente Económico Tier 4):**
-   - Lanza un subagente con el modelo más ligero disponible (`flash_lite` / Tier 4) para que en una sola lectura:
-     - Detecte automáticamente el proveedor de IA donde corre la sesión actual (o el proveedor que el usuario haya indicado en su prompt) y obtenga sus modelos disponibles (`agy models`, catálogo de Claude Code, Codex, Cursor u Ollama).
-     - Audite el stack actual del proyecto, su gestor de paquetes, estructura de carpetas y cualquier documentación en `docs/` o archivos `.md`.
+1. **Reconocimiento Autónomo (Priorizando el Modelo más Ligero Disponible):**
+   - Si tu entorno soporta delegación en subagentes, lanza un subagente con el modelo más ligero/económico disponible (Tier 4); de lo contrario, realiza la inspección directamente de forma concisa:
+     - Detecta automáticamente el proveedor de IA donde corre la sesión actual (o el proveedor que el usuario haya indicado en su prompt) y obtén sus modelos disponibles (`agy models`, catálogo de Claude Code, Codex, Cursor u Ollama).
+     - Audita el stack actual del proyecto, su gestor de paquetes, estructura de carpetas y cualquier documentación en `docs/` o archivos `.md`.
 2. **Construcción de la Memoria de Doble Capa en `context/`:**
    - Siguiendo [`./references/moldes-orquestacion.md`](./references/moldes-orquestacion.md), crea:
      - `context/arquitectura.md` (**Capa Permanente**: mapa real del stack actual, módulos, base de datos, contratos, comandos con su gestor actual y conocimiento técnico extraído de `docs/`, manteniendo `docs/` intacto).
@@ -55,7 +56,7 @@ Identifica qué acción solicita el desarrollador (ya sea mediante comando corto
      > Cuando lo necesites, puedes ejecutar cualquiera de estas acciones adicionales:
      > - `/multi-agent-architect models` — Revisar y actualizar los modelos de tus agentes si salieron versiones mejores.
      > - `/multi-agent-architect stack` — Analizar tu stack actual y ver sugerencias opcionales de mejora.
-     > - `/multi-agent-architect skills` — Recibir recomendaciones de skills públicas verificadas para tu proyecto.
+     > - `/multi-agent-architect skills` — Recibir recomendaciones de skills estándar y específicas para tu proyecto.
 
 ---
 
@@ -66,7 +67,7 @@ Cuando el usuario invoque `/multi-agent-architect models` (o pida revisar/actual
 1. **Lectura de Configuración Actual:**
    - Inspecciona los campos `model:` y `fallback_model:` actuales en `GEMINI.md` / `CLAUDE.md`, `AGENTS.md` y todos los archivos de `.agents/agents/*.md`.
 2. **Consulta en Vivo del Catálogo del Proveedor:**
-   - Mediante el subagente económico, obtiene la lista actualizada de modelos disponibles hoy en el proveedor del desarrollador.
+   - Obtiene la lista actualizada de modelos disponibles hoy en el proveedor del desarrollador.
 3. **Evaluación y Balance (Capacidad vs. Consumo de Cuota):**
    - Aplica los criterios de [`./references/reglas-enrutamiento-dinamico.md`](./references/reglas-enrutamiento-dinamico.md):
      - Evalúa por cada rol (Tier 1 a Tier 4) si existe un modelo nuevo o superior que mejore el razonamiento, la velocidad o la eficiencia de tokens (o si algún modelo configurado quedó deprecado).
@@ -96,16 +97,18 @@ Cuando el usuario invoque `/multi-agent-architect stack` (o pida sugerencias par
 
 ---
 
-## ACCIÓN 4: `skills` — Recomendación Curada de Skills de la Comunidad
+## ACCIÓN 4: `skills` — Recomendación Híbrida (Skills Estándar + Búsqueda en Vivo)
 
 Cuando el usuario invoque `/multi-agent-architect skills` (o pida recomendaciones de skills externas para su proyecto):
 
-1. **Selección Curada:**
-   - Cruza las tecnologías y el dominio del proyecto actual contra [`./references/boveda-skills.md`](./references/boveda-skills.md) y selecciona entre **3 y 6 skills públicas verificadas**.
-2. **Presentación con Enlaces Oficiales:**
-   - Muestra cada skill sugerida indicando:
+1. **Capa 1 — Núcleo Estándar Universal:**
+   - Consulta [`./references/skills-estandar.md`](./references/skills-estandar.md) y selecciona **2 o 3 skills transversales** esenciales para el tipo de proyecto (ej. seguridad OWASP, TDD/debugging/review, testing E2E web, diseño UI o documentos).
+2. **Capa 2 — Búsqueda Dinámica en Internet (Específicas del Stack):**
+   - Identifica las tecnologías principales del proyecto (ej. Astro, Next.js, Rust, Go, Laravel, Flutter, Supabase, Prisma, Docker, Terraform) y busca en el ecosistema (`skills.sh`, `npx skills find <tecnología>` o GitHub) **2 o 3 skills específicas** activas y con buena adopción para esas tecnologías.
+3. **Presentación Unificada con Enlaces Oficiales:**
+   - Muestra ambas secciones claramente diferenciadas (**Skills Estándar Recomendadas** + **Skills Específicas para tu Stack**) indicando para cada una:
      - **Nombre de la skill** y **por qué aporta valor a este proyecto**.
-     - **Enlace oficial** (GitHub / `skills.sh`) para que el desarrollador pueda revisarla.
-     - **Comando de instalación adaptado al gestor actual del proyecto** (`npx skills add ...` si usa `npm`, `pnpm dlx skills add ...` si usa `pnpm`, `bunx skills add ...` si usa `bun`).
-3. **Instalación Bajo Confirmación:**
+     - **Enlace oficial verificado** (GitHub / `skills.sh`) para que el desarrollador pueda revisarla.
+     - **Comando de instalación adaptado al gestor actual del proyecto** (`npx skills add ...`, `pnpm dlx skills add ...` o `bunx skills add ...`).
+4. **Instalación Bajo Confirmación:**
    - Instala únicamente las skills que el desarrollador pida expresamente (o cualquier otra que haya investigado por su cuenta) y sincroniza `context/arquitectura.md`.

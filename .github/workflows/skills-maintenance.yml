@@ -1,0 +1,69 @@
+name: Standardized Skills Maintenance
+
+on:
+  schedule:
+    # Se ejecuta automáticamente todos los domingos a las 09:00 UTC
+    - cron: "0 9 * * 0"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  audit-skills:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Verify standardized skills and check for updates
+        id: check
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+        run: node .github/scripts/check-skills.mjs
+
+      - name: Upload maintenance report artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: skills-maintenance-report
+          path: maintenance-report.md
+
+      - name: Create or update maintenance issue when action is needed
+        if: steps.check.outputs.should_notify == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const body = fs.readFileSync('maintenance-report.md', 'utf8');
+            const title = '[Skills Maintenance] Revisión semanal de vigencia y nuevas skills estándar';
+
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              per_page: 20,
+            });
+
+            const existing = issues.find(i => i.title === title);
+            if (existing) {
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existing.number,
+                body,
+              });
+            } else {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title,
+                body,
+              });
+            }
