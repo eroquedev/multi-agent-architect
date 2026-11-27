@@ -1,0 +1,32 @@
+name: Validate Skill Package
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Validate skill specification and links
+        run: node .github/scripts/validate-skill.mjs
+
+      - name: Syntax-check maintenance scripts
+        run: |
+          node --check .github/scripts/check-skills.mjs
+          node --check .github/scripts/validate-skill.mjs

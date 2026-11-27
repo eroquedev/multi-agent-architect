@@ -1,16 +1,15 @@
 /**
- * Auditor automático semanal para `skills-estandar.md`.
+ * Auditor automático semanal para `core-skills.md`.
  * - Verifica mediante la API de GitHub que cada repositorio y ruta de skill siga activo (no 404, no archivado, actividad reciente).
- * - Revisa commits recientes (últimos 14 días) en los directorios de skills de repositorios oficiales monitoreados para detectar novedades sin generar ruido histórico.
- * - Consulta señales públicas del ecosistema (skillleaderboard.com) como referencia opcional.
- * - Genera `maintenance-report.md` y expone `GITHUB_OUTPUT` (`should_notify=true|false`).
+ * - Revisa commits recientes (últimos 14 días) en los directorios de skills de repositorios oficiales monitoreados.
+ * - Sanitiza cualquier texto externo antes de insertarlo en el reporte Markdown.
  */
 
 import fs from "node:fs";
 import path from "node:path";
 
 const SKILLS_FILE = path.resolve(
-  "skills/multi-agent-architect/references/skills-estandar.md"
+  "skills/multi-agent-architect/references/core-skills.md"
 );
 const REPORT_FILE = path.resolve("maintenance-report.md");
 const STALE_DAYS_THRESHOLD = 365;
@@ -32,6 +31,14 @@ const headers = {
     : {}),
 };
 
+function sanitizeMd(input) {
+  return String(input || "")
+    .replace(/[\r\n]+/g, " ")
+    .replace(/[<>`[\]\\]/g, "")
+    .trim()
+    .slice(0, 140);
+}
+
 async function ghFetch(url) {
   const res = await fetch(url, { headers });
   if (!res.ok) {
@@ -41,7 +48,8 @@ async function ghFetch(url) {
 }
 
 function extractGitHubUrls(markdown) {
-  const regex = /https:\/\/github\.com\/([A-Za-z0-9_.-]+)\/([A-Za-z0-9_.-]+)(?:\/tree\/[^/]+\/([^\s)]+))?/g;
+  const regex =
+    /https:\/\/github\.com\/([A-Za-z0-9_.-]+)\/([A-Za-z0-9_.-]+)(?:\/tree\/[^/]+\/([^\s)]+))?/g;
   const seen = new Map();
   for (const match of markdown.matchAll(regex)) {
     const [fullUrl, owner, repo, subpath] = match;
@@ -66,12 +74,12 @@ async function checkReferencedLinks(entries) {
     const repoRes = repoCache.get(repoKey);
 
     if (!repoRes.ok || !repoRes.data) {
-      broken.push({ ...entry, reason: `HTTP ${repoRes.status} al consultar repositorio` });
+      broken.push({ ...entry, reason: `HTTP ${repoRes.status} querying repository` });
       continue;
     }
 
     if (repoRes.data.archived || repoRes.data.disabled) {
-      broken.push({ ...entry, reason: "Repositorio archivado o deshabilitado" });
+      broken.push({ ...entry, reason: "Repository archived or disabled" });
       continue;
     }
 
@@ -82,7 +90,7 @@ async function checkReferencedLinks(entries) {
       if (!pathRes.ok) {
         broken.push({
           ...entry,
-          reason: `Ruta interna no encontrada (HTTP ${pathRes.status}): ${entry.subpath}`,
+          reason: `Subpath not found (HTTP ${pathRes.status}): ${entry.subpath}`,
         });
         continue;
       }
@@ -119,13 +127,16 @@ async function checkRecentOfficialActivity() {
     if (!res.ok || !Array.isArray(res.data)) continue;
 
     for (const commit of res.data) {
-      const title = (commit?.commit?.message || "").split("\n")[0];
+      const rawTitle = (commit?.commit?.message || "").split("\n")[0];
+      const title = sanitizeMd(rawTitle);
       if (!title) continue;
       updates.push({
         repo: `${target.owner}/${target.repo}`,
-        date: (commit?.commit?.author?.date || "").slice(0, 10),
+        date: sanitizeMd((commit?.commit?.author?.date || "").slice(0, 10)),
         title,
-        url: commit.html_url,
+        url: String(commit.html_url || "").startsWith("https://github.com/")
+          ? commit.html_url
+          : "",
       });
     }
   }
@@ -143,16 +154,14 @@ async function fetchLeaderboardHighlights() {
       const json = await res.json();
       const items = Array.isArray(json?.data) ? json.data : Array.isArray(json) ? json : [];
       for (const s of items.slice(0, 3)) {
-        if (s?.name) {
-          highlights.push({
-            category: query,
-            name: s.name,
-            repo: s.repository || s.repo || s.source || "N/A",
-          });
+        const name = sanitizeMd(s?.name);
+        const repo = sanitizeMd(s?.repository || s?.repo || s?.source || "N/A");
+        if (name) {
+          highlights.push({ category: query, name, repo });
         }
       }
     } catch {
-      // Silenciar fallos externos opcionales para no bloquear el workflow
+      // Ignore optional third-party API failures
     }
   }
   return highlights;
@@ -165,54 +174,54 @@ async function main() {
   const recentUpdates = await checkRecentOfficialActivity();
   const leaderboard = await fetchLeaderboardHighlights();
 
-  // Notificar con Issue cuando haya enlaces rotos/obsoletos (o siempre si se ejecuta manualmente)
   const isManual = process.env.GITHUB_EVENT_NAME === "workflow_dispatch";
   const shouldNotify = broken.length > 0 || stale.length > 0 || isManual;
 
   const lines = [
-    `# Reporte de Mantenimiento — \`skills-estandar.md\``,
+    `# Core Skills Maintenance Report — \`core-skills.md\``,
     "",
-    `- **Fecha de ejecución:** ${new Date().toISOString().slice(0, 10)}`,
-    `- **Enlaces verificados:** ${links.length} (${healthy.length} saludables, ${stale.length} inactivos >${STALE_DAYS_THRESHOLD}d, ${broken.length} caídos/archivados)`,
+    `- **Run date:** ${new Date().toISOString().slice(0, 10)}`,
+    `- **Checked links:** ${links.length} (${healthy.length} healthy, ${stale.length} stale >${STALE_DAYS_THRESHOLD}d, ${broken.length} broken/archived)`,
     "",
   ];
 
   if (broken.length > 0) {
-    lines.push("## ❌ Enlaces Caídos, Archivados o Rutas Inválidas (Requiere reemplazo)");
+    lines.push("## ❌ Broken, Archived, or Missing Links (Action Required)");
     for (const b of broken) {
-      lines.push(`- ${b.fullUrl} — **Motivo:** ${b.reason}`);
+      lines.push(`- ${b.fullUrl} — **Reason:** ${sanitizeMd(b.reason)}`);
     }
     lines.push("");
   }
 
   if (stale.length > 0) {
-    lines.push(`## ⚠️ Repositorios sin actividad reciente (>${STALE_DAYS_THRESHOLD} días)`);
+    lines.push(`## ⚠️ Stale Repositories (>${STALE_DAYS_THRESHOLD} days without push)`);
     for (const s of stale) {
-      lines.push(`- ${s.fullUrl} — Último push: \`${s.pushedAt}\` (⭐ ${s.stars})`);
+      lines.push(`- ${s.fullUrl} — Last push: \`${s.pushedAt}\` (⭐ ${s.stars})`);
     }
     lines.push("");
   }
 
   if (healthy.length > 0) {
-    lines.push("## ✅ Skills Saludables Verificadas");
+    lines.push("## ✅ Healthy Verified Skills");
     for (const h of healthy) {
-      lines.push(`- ${h.fullUrl} — ⭐ ${h.stars} | Último push: \`${h.pushedAt}\``);
+      lines.push(`- ${h.fullUrl} — ⭐ ${h.stars} | Last push: \`${h.pushedAt}\``);
     }
     lines.push("");
   }
 
   if (recentUpdates.length > 0) {
-    lines.push(`## 🆕 Actividad Reciente en Repositorios Oficiales (Últimos ${RECENT_UPDATES_DAYS} días)`);
+    lines.push(`## 🆕 Recent Activity in Monitored Official Repos (Last ${RECENT_UPDATES_DAYS} days)`);
     for (const u of recentUpdates) {
-      lines.push(`- [\`${u.repo}\`] (${u.date}) [${u.title}](${u.url})`);
+      const linkPart = u.url ? `[${u.title}](${u.url})` : u.title;
+      lines.push(`- [\`${u.repo}\`] (${u.date}) ${linkPart}`);
     }
     lines.push("");
   }
 
   if (leaderboard.length > 0) {
-    lines.push("## 📊 Referencia del Ecosistema (Top por categoría transversal)");
+    lines.push("## 📊 Ecosystem Reference (Top by Cross-Cutting Category)");
     for (const l of leaderboard) {
-      lines.push(`- [${l.category}] **${l.name}** (${l.repo})`);
+      lines.push(`- [${l.category}] **${l.name}** (\`${l.repo}\`)`);
     }
     lines.push("");
   }
@@ -221,10 +230,7 @@ async function main() {
   console.log(lines.join("\n"));
 
   if (process.env.GITHUB_OUTPUT) {
-    fs.appendFileSync(
-      process.env.GITHUB_OUTPUT,
-      `should_notify=${shouldNotify}\n`
-    );
+    fs.appendFileSync(process.env.GITHUB_OUTPUT, `should_notify=${shouldNotify}\n`);
   }
 }
 

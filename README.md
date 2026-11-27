@@ -1,74 +1,82 @@
 # 🧩 `multi-agent-architect`
 
+🌐 **English** | [Español](./README.es.md)
+
 [![skills.sh](https://skills.sh/b/eroquedev/multi-agent-architect)](https://skills.sh/eroquedev/multi-agent-architect)
+[![Validate Skill](https://github.com/eroquedev/multi-agent-architect/actions/workflows/validate-skill.yml/badge.svg)](https://github.com/eroquedev/multi-agent-architect/actions/workflows/validate-skill.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 
-Skill de **Orquestación Multiagente**, **Enrutamiento Dinámico de Modelos** y **Memoria de Doble Capa** para agentes de desarrollo con IA (**Gemini CLI / Antigravity**, **Claude Code**, **Cursor**, **Codex**, **OpenCode**, **Windsurf**).
+An autonomous **Multi-Agent Orchestration**, **Dynamic 4-Tier Model Routing**, and **Double-Layer Memory** Agent Skill for AI coding assistants (**Gemini CLI / Antigravity**, **Claude Code**, **Cursor**, **Codex**, **OpenCode**, **Windsurf**).
 
 ---
 
-## 📦 Instalación
+## 📦 Installation
 
 ```bash
-# Instalar en el proyecto actual
+# Install into the current project
 npx skills add eroquedev/multi-agent-architect
 
-# O con pnpm / global (-g)
+# Or with pnpm / globally (-g)
 pnpm dlx skills add eroquedev/multi-agent-architect -g
 ```
 
-También puedes pedirle directamente a tu agente en el chat:
-> *"Instala la skill de `https://github.com/eroquedev/multi-agent-architect` en este proyecto."*
+Or simply ask your AI coding assistant directly in chat:
+> *"Install the skill from `https://github.com/eroquedev/multi-agent-architect` into this project."*
 
 ---
 
-## ⚡ Uso y Acciones
+## ⚡ Usage & Actions
 
-Una vez instalada, invoca la acción que necesites mediante comando corto o lenguaje natural:
+Invoke the exact action you need via short command or natural language (the skill adapts automatically to your conversation language):
 
-| Comando | Lenguaje Natural | Qué hace |
+| Action | Natural Language Example | What It Does |
 | :--- | :--- | :--- |
-| `/multi-agent-architect init`<br>*(acción por defecto)* | *"Usa `multi-agent-architect` para configurar este proyecto"* | **Inicialización en un solo paso sin pausas:** detecta tu proveedor y modelos activos, respeta el stack actual de tu proyecto y genera toda la orquestación y memoria en segundo plano. |
-| `/multi-agent-architect models` | *"Con `multi-agent-architect` actualiza los modelos de mis agentes"* | Revisa si tu proveedor tiene modelos nuevos o más eficientes, hace un balance capacidad/consumo, actualiza los agentes que lo requieran y reporta los cambios. |
-| `/multi-agent-architect stack` | *"Con `multi-agent-architect` sugiere mejoras para mi stack"* | Muestra una comparativa entre tu stack actual y mejoras técnicas opcionales (con su justificación). Solo aplica cambios si los apruebas. |
-| `/multi-agent-architect skills` | *"Con `multi-agent-architect` recomiéndame skills para este proyecto"* | Enfoque híbrido: recomienda skills estándar universales + busca en internet skills específicas para tu stack con enlaces oficiales para instalar bajo confirmación. |
+| `/multi-agent-architect init`<br>*(default)* | *"Use `multi-agent-architect` to configure this project"* | **Single-pass zero-friction setup:** detects your active provider/models, respects your existing stack and secrets hygiene (`.env`), merges safely with existing configs, and enables background context auto-sync. |
+| `/multi-agent-architect models` | *"Use `multi-agent-architect` to update my agent models"* | Queries your provider's live models, evaluates improvements per cognitive tier, updates only where beneficial, and explains every change. |
+| `/multi-agent-architect stack` | *"Use `multi-agent-architect` to suggest stack improvements"* | Presents a comparison table (*Current Stack vs. Suggested Improvements*) and applies changes only upon your approval. |
+| `/multi-agent-architect skills` | *"Use `multi-agent-architect` to recommend skills for this project"* | Hybrid recommendations: pairs curated universal engineering skills with live ecosystem search tailored to your stack and verified links. |
 
 ---
 
-## 🏗️ Arquitectura que Genera en tu Proyecto
+## 🏗️ Generated Project Architecture
 
 ```text
-tu-proyecto/
-├── GEMINI.md / CLAUDE.md          # Orquestador Principal (Full-Delegation + Auto-Sync)
-├── AGENTS.md                      # Puente universal compatible con cualquier CLI/IDE
+your-project/
+├── AGENTS.md                      # Single source of truth (Full-Delegation + Auto-Sync)
+├── GEMINI.md / CLAUDE.md          # Thin provider adapter pointing to AGENTS.md
 ├── context/
-│   ├── arquitectura.md            # Capa Permanente (Fuente de verdad estructural)
-│   └── estado-y-plan.md           # Capa Efímera (Avances, commit sugerido y backlog)
+│   ├── architecture.md            # Permanent Layer (modules, schemas, contracts, env names)
+│   └── status-and-plan.md         # Ephemeral Layer (max 60 lines: progress, commit & backlog)
 └── .agents/
-    ├── agents/                    # Subagentes especializados con model y fallback_model
-    └── skills/                    # Skills de dominio extraídas de las reglas de tu proyecto
+    ├── agents/                    # Specialist subagents with model & fallback_model
+    └── skills/                    # Project-specific domain skills distilled from your codebase
 ```
 
 ---
 
-## 📂 Estructura del Repositorio
+## 📂 Repository Structure
 
 ```text
 multi-agent-architect/
-├── .github/workflows/skills-maintenance.yml      # Auditoría semanal automática de vigencia de skills
-├── LICENSE                                       # Licencia MIT
-├── README.md                                     # Documentación general
+├── .github/
+│   ├── workflows/
+│   │   ├── validate-skill.yml              # CI validation for frontmatter, links & scripts
+│   │   └── skills-maintenance.yml          # Weekly automated audit of core skills health
+│   └── scripts/
+├── LICENSE                                 # MIT License
+├── README.md                               # English documentation
+├── README.es.md                            # Documentación en español
 └── skills/
     └── multi-agent-architect/
-        ├── SKILL.md                              # Especificación y flujo de las 4 acciones
+        ├── SKILL.md                        # Skill specification & 4-action workflow (v1.0.0)
         └── references/
-            ├── reglas-enrutamiento-dinamico.md   # Clasificación en 4 Tiers y balance de modelos
-            ├── skills-estandar.md                # Catálogo curado de skills estándar universales
-            └── moldes-orquestacion.md            # Plantillas de memoria en doble capa y subagentes
+            ├── dynamic-routing.md          # 4-Tier cognitive routing & rebalancing rules
+            ├── core-skills.md              # Curated universal engineering skills catalog
+            └── orchestration-templates.md  # Double-Layer memory, monorepo & greenfield templates
 ```
 
 ---
 
-## 📄 Licencia
+## 📄 License
 
 [MIT](./LICENSE)

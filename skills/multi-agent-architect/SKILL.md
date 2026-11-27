@@ -1,114 +1,92 @@
 ---
 name: multi-agent-architect
 description: >-
-  Use this skill to initialize, manage, or upgrade multi-agent orchestration and
-  Double-Layer Memory (GEMINI.md, CLAUDE.md, AGENTS.md, context/, .agents/) in any
-  project. Supports 4 independent actions: (1) 'init' to generate the complete
-  orchestration in a single uninterrupted pass respecting the project's current stack,
-  (2) 'models' to audit and rebalance agent models when new provider models appear,
-  (3) 'stack' to compare the current stack against optional technical improvements,
-  and (4) 'skills' for hybrid skill recommendations combining core standardized skills
-  with live ecosystem search for the project's specific stack.
+  Use this skill to initialize, manage, or upgrade multi-agent orchestration,
+  dynamic 4-tier model routing, and Double-Layer Memory (AGENTS.md, GEMINI.md,
+  CLAUDE.md, context/, .agents/) in any project. Supports 4 independent actions:
+  (1) 'init' for uninterrupted single-pass setup respecting the current stack
+  and secret hygiene, (2) 'models' to audit and rebalance agent models when
+  newer models become available, (3) 'stack' to compare the current stack
+  against optional improvements, and (4) 'skills' for hybrid recommendations
+  combining curated core engineering skills with live ecosystem search.
+license: MIT
+metadata:
+  author: eroquedev
+  version: "1.0.0"
 ---
 
-# `multi-agent-architect` — Orquestación Multiagente e Ingeniería de Contexto
+# `multi-agent-architect` — Autonomous Multi-Agent Orchestration & Context Engineering
 
-Esta skill opera mediante **4 acciones independientes** para configurar y mantener la arquitectura multiagente del proyecto sin interrupciones innecesarias.
+This skill configures and maintains a clean, token-efficient **Multi-Agent Orchestration** and **Double-Layer Memory** architecture inside any codebase or document/productivity workflow.
 
-## Tabla de Acciones e Invocación
+> **Language Rule:** Always communicate with the developer and generate project documentation (`AGENTS.md`, `context/`, `.agents/`) in the **same language the user used to invoke this skill** (e.g., English if prompted in English, Spanish if prompted in Spanish).
 
-Identifica qué acción solicita el desarrollador (ya sea mediante comando corto o en lenguaje natural) y ejecuta **únicamente** el flujo correspondiente:
+## Actions & Invocation
 
-| Acción | Comando Corto | Equivalente en Lenguaje Natural | Propósito |
+Identify the requested action (via slash-style command or natural language) and execute **only** that workflow:
+
+| Action | Short Command | Natural Language Trigger | Purpose |
 | :--- | :--- | :--- | :--- |
-| **`init`** *(Por defecto)* | `/multi-agent-architect` o `/multi-agent-architect init` | *"Configura / inicializa la orquestación de este proyecto"* | Genera toda la orquestación de principio a fin en **un solo proceso sin pausas**, respetando el stack actual del proyecto. |
-| **`models`** | `/multi-agent-architect models` | *"Actualiza / mejora los modelos de mis agentes"* | Consulta los modelos actuales del proveedor, evalúa si hay modelos nuevos o mejores y actualiza los agentes explicando cada cambio. |
-| **`stack`** | `/multi-agent-architect stack` | *"Analiza o sugiere mejoras de stack para mi proyecto"* | Compara el stack actual del proyecto frente a mejoras opcionales recomendadas y aplica solo las que el usuario apruebe. |
-| **`skills`** | `/multi-agent-architect skills` | *"Recomiéndame skills para este proyecto"* | Combina skills estándar universales + búsqueda en vivo para el stack del proyecto, entregando enlaces oficiales para instalar bajo confirmación. |
+| **`init`** *(Default)* | `/multi-agent-architect` or `/multi-agent-architect init` | *"Configure / initialize multi-agent orchestration for this project"* | Full single-pass setup without intermediate pauses, strictly respecting the project's existing stack. |
+| **`models`** | `/multi-agent-architect models` | *"Update / rebalance my agent models"* | Re-queries the provider's live catalog, evaluates model improvements per tier, and updates only where beneficial. |
+| **`stack`** | `/multi-agent-architect stack` | *"Analyze or suggest improvements for my project stack"* | Presents a comparative table (*Current Stack vs. Suggested Improvements*) and applies changes only upon approval. |
+| **`skills`** | `/multi-agent-architect skills` | *"Recommend useful skills for this project"* | Combines universal core skills with live ecosystem search for the project's specific stack and provides verified links. |
 
 ---
 
-## ACCIÓN 1: `init` — Inicialización Directa en Un Solo Proceso (Por Defecto)
+## ACTION 1: `init` — Single-Pass Zero-Friction Setup (Default)
 
-> **Regla de Cero Fricción:** En proyectos existentes, **no detengas el proceso con preguntas intermedias, no impongas cambios de stack (respeta su gestor actual `npm`, `pnpm`, `yarn`, `bun`, `cargo`, `uv`, etc.) y nunca elimines archivos de su carpeta `docs/`**. Genera toda la estructura de corrido.
-> *(Única excepción: si el directorio está completamente vacío y el usuario pide crear un proyecto desde cero / Greenfield, aplica primero la Fase 1 de consultoría descrita en [`./references/moldes-orquestacion.md`](./references/moldes-orquestacion.md)).*
+> **Non-Intrusive Rules:**
+> - **Respect the existing stack:** Never force package manager migrations (`npm`, `pnpm`, `yarn`, `bun`, `cargo`, `uv`, etc.) or remove existing `docs/` files during `init`.
+> - **Safe Idempotent Merge:** If `AGENTS.md`, `GEMINI.md`, `CLAUDE.md`, `context/`, or `.agents/` already exist, preserve and merge the user's custom rules, skills, and `resources/*` instead of overwriting them blindly.
+> - **Strict Secret Hygiene:** **NEVER** read `.env`, `.env.local`, `.pem`, `.key`, or credential files. Discover environment variable names strictly from `.env.example` / `.env.template` or by scanning code references (`process.env.*`, `import.meta.env.*`, `os.environ`, `std::env`). Verify `.env` is listed in `.gitignore`.
+> - *(Exception: If the working directory is empty for a brand-new Greenfield project, run Phase 1 interactive consulting from [`./references/orchestration-templates.md`](./references/orchestration-templates.md) first.)*
 
-### Pasos de Ejecución Continua (`init`):
-1. **Reconocimiento Autónomo (Priorizando el Modelo más Ligero Disponible):**
-   - Si tu entorno soporta delegación en subagentes, lanza un subagente con el modelo más ligero/económico disponible (Tier 4); de lo contrario, realiza la inspección directamente de forma concisa:
-     - Detecta automáticamente el proveedor de IA donde corre la sesión actual (o el proveedor que el usuario haya indicado en su prompt) y obtén sus modelos disponibles (`agy models`, catálogo de Claude Code, Codex, Cursor u Ollama).
-     - Audita el stack actual del proyecto, su gestor de paquetes, estructura de carpetas y cualquier documentación en `docs/` o archivos `.md`.
-2. **Construcción de la Memoria de Doble Capa en `context/`:**
-   - Siguiendo [`./references/moldes-orquestacion.md`](./references/moldes-orquestacion.md), crea:
-     - `context/arquitectura.md` (**Capa Permanente**: mapa real del stack actual, módulos, base de datos, contratos, comandos con su gestor actual y conocimiento técnico extraído de `docs/`, manteniendo `docs/` intacto).
-     - `context/estado-y-plan.md` (**Capa Efímera**: máx. 60 líneas con estado operativo, avances, `## Commit Recomendado` y backlog activo).
-3. **Creación de Skills Propios del Proyecto en `.agents/skills/`:**
-   - Crea entre **2 y 5 skills internas** en `.agents/skills/<dominio>/SKILL.md` basadas en las reglas y convenciones reales del código auditado (preservando intacta cualquier carpeta `resources/*` preexistente).
-4. **Creación de Subagentes (`.agents/agents/`) y Archivos Raíz (`GEMINI.md` / `CLAUDE.md` + `AGENTS.md`):**
-   - Clasifica los modelos detectados en los **4 Tiers Cognitivos** de [`./references/reglas-enrutamiento-dinamico.md`](./references/reglas-enrutamiento-dinamico.md) y crea los subagentes necesarios para el proyecto (`arquitecto-sistema.md`, `especialista-backend.md`, `especialista-datos.md`, `especialista-plataforma.md`, `especialista-ui-ux.md`, `auditor-qa-tests.md` y **`explorador-codigo.md`** en Tier 4), cada uno con su `model:` y `fallback_model:`.
-   - Crea el archivo raíz del proveedor (`GEMINI.md` y/o `CLAUDE.md`) y `AGENTS.md` dejando activadas en segundo plano las **3 Directivas Autónomas**:
-     1. *Full-Delegation Orchestration* (el Orquestador planifica y delega la exploración en `@explorador-codigo`).
-     2. *Recuperación Silenciosa de Contexto* (lectura automática de `context/` al iniciar tareas o tras compactación del chat).
-     3. *Post-Task Auto-Sync* (`@explorador-codigo` actualiza automáticamente `context/arquitectura.md` y `context/estado-y-plan.md` cada vez que se realizan cambios en el proyecto).
-5. **Cierre Limpio:**
-   - Muestra el árbol de archivos creados y finaliza con este bloque informativo de 4 líneas:
-     > ✅ **Orquestación inicializada respetando el stack actual de tu proyecto.**
-     > Cuando lo necesites, puedes ejecutar cualquiera de estas acciones adicionales:
-     > - `/multi-agent-architect models` — Revisar y actualizar los modelos de tus agentes si salieron versiones mejores.
-     > - `/multi-agent-architect stack` — Analizar tu stack actual y ver sugerencias opcionales de mejora.
-     > - `/multi-agent-architect skills` — Recibir recomendaciones de skills estándar y específicas para tu proyecto.
-
----
-
-## ACCIÓN 2: `models` — Actualización y Re-balanceo Inteligente de Modelos
-
-Cuando el usuario invoque `/multi-agent-architect models` (o pida revisar/actualizar los modelos de sus agentes):
-
-1. **Lectura de Configuración Actual:**
-   - Inspecciona los campos `model:` y `fallback_model:` actuales en `GEMINI.md` / `CLAUDE.md`, `AGENTS.md` y todos los archivos de `.agents/agents/*.md`.
-2. **Consulta en Vivo del Catálogo del Proveedor:**
-   - Obtiene la lista actualizada de modelos disponibles hoy en el proveedor del desarrollador.
-3. **Evaluación y Balance (Capacidad vs. Consumo de Cuota):**
-   - Aplica los criterios de [`./references/reglas-enrutamiento-dinamico.md`](./references/reglas-enrutamiento-dinamico.md):
-     - Evalúa por cada rol (Tier 1 a Tier 4) si existe un modelo nuevo o superior que mejore el razonamiento, la velocidad o la eficiencia de tokens (o si algún modelo configurado quedó deprecado).
-     - **Regla de Estabilidad:** Si no hay una diferencia significativa para un rol, **mantiene el modelo actual sin cambios**.
-     - Si hay una mejora real, actualiza `model:` y/o `fallback_model:` en los archivos `.md` correspondientes y sincroniza `context/arquitectura.md` y `context/estado-y-plan.md`.
-4. **Reporte de Actualización:**
-   - Responde al desarrollador con una tabla clara:
-     - **Agente / Archivo**
-     - **Modelo Anterior ➔ Modelo Actualizado** *(o "Sin cambios — ya usa el óptimo")*
-     - **Justificación técnica** *(por qué es mejor en capacidad, velocidad o eficiencia de cuota)*.
+### Execution Steps (`init`):
+1. **Layered Project Audit & Provider Detection (Economical Model First):**
+   - If your environment supports subagents, delegate this discovery step to a lightweight/economical subagent (Tier 4); otherwise run a concise direct inspection:
+     - Detect the active AI provider and live available models (e.g., `agy models` for Gemini/Antigravity, Claude Code catalog, Codex, Cursor, OpenCode, or `ollama list`).
+     - Perform a **layered codebase audit** (never read hundreds of files): inspect the folder tree (ignoring `node_modules`, `.git`, `dist`, `.next`, `target`), key manifests (`package.json`, `Cargo.toml`, `pyproject.toml`, etc.), schemas, `.env.example` (or env variable names in code), `docs/`, and 1–2 representative source files.
+2. **Double-Layer Memory in `context/`:**
+   - Using [`./references/orchestration-templates.md`](./references/orchestration-templates.md), create or merge:
+     - `context/architecture.md` (or `context/arquitectura.md` if Spanish): **Permanent Layer** — stack/versions, module map, monorepo structure (if applicable), data schemas, API contracts, official commands using the project's current tooling, environment variable *names* (zero values), and technical knowledge distilled from `docs/`.
+     - `context/status-and-plan.md` (or `context/estado-y-plan.md` if Spanish): **Ephemeral Layer (MAX 60 LINES)** — operational status, recent progress, `## Recommended Commit` (*Conventional Commits*), and active backlog.
+3. **Domain Skills in `.agents/skills/`:**
+   - Create 2–5 project-specific internal skills (`.agents/skills/<domain>/SKILL.md`) capturing real codebase conventions, validation patterns, and business rules. Preserve any existing `resources/*` folders.
+   - Do **not** auto-install external community skills during `init`.
+4. **Subagents (`.agents/agents/`) & Single-Source Root Orchestration:**
+   - Classify the live provider models into **4 Cognitive Tiers** per [`./references/dynamic-routing.md`](./references/dynamic-routing.md) and create only the needed specialist subagents (`system-architect`, `backend-specialist`, `data-specialist`, `platform-specialist`, `ui-ux-specialist`, `qa-auditor`, plus **`code-explorer`** on the lightest Tier 4 model), each declaring `model:` and `fallback_model:`.
+   - **Avoid Double Token Loading:** Write the complete orchestration rules, subagent matrix, and the **3 Autonomous Directives** inside **`AGENTS.md`** as the single source of truth, and keep **`GEMINI.md` / `CLAUDE.md`** as lightweight 5–8 line adapters pointing to `AGENTS.md` and `context/`:
+     1. *Full-Delegation Orchestration* (Orchestrator plans/designs and delegates exploration to `@code-explorer` under a strict Exploration Budget).
+     2. *Silent Context Recovery* (Orchestrator silently reads `context/` at task start or after chat history compaction).
+     3. *Post-Task Auto-Sync* (`@code-explorer` automatically updates the Permanent Layer on structural/skill/agent changes and the Ephemeral Layer after each completed task).
+5. **Clean Summary:**
+   - Display the created/merged file tree and conclude with a brief 4-line note listing the optional follow-up actions: `/multi-agent-architect models`, `/multi-agent-architect stack`, and `/multi-agent-architect skills`.
 
 ---
 
-## ACCIÓN 3: `stack` — Consultoría Opcional de Mejoras de Stack
+## ACTION 2: `models` — Intelligent Model Audit & Rebalancing
 
-Cuando el usuario invoque `/multi-agent-architect stack` (o pida sugerencias para mejorar el stack de su proyecto):
-
-1. **Diagnóstico Comparativo (Sin Modificar Archivos Aún):**
-   - Analiza las herramientas actuales del proyecto (gestor de paquetes como `npm` vs `pnpm`, configuración de tipado, linters, scripts de build, estructura de dependencias o seguridad).
-   - Presenta al desarrollador una tabla clara con 3 columnas:
-     - **Stack Actual en tu Proyecto**
-     - **Mejora Sugerida** *(ej. migrar de `npm` a `pnpm` en Node.js, de `pip` a `uv` en Python, activar strict mode, etc.)*
-     - **Por qué se sugiere** *(beneficio real en seguridad de dependencias, velocidad, aislamiento o mantenibilidad)*.
-2. **Decisión del Desarrollador:**
-   - Pregunta: *"¿Deseas que aplique alguna de estas mejoras o prefieres mantener tu stack actual?"*
-   - Si el desarrollador decide mantener su stack, no modifiques nada. Si aprueba una o más mejoras, aplícalas y haz que `@explorador-codigo` actualice automáticamente `context/arquitectura.md` y `context/estado-y-plan.md`.
+When the user invokes `/multi-agent-architect models`:
+1. **Read Current Assignments:** Inspect `model:` and `fallback_model:` across `AGENTS.md`, `GEMINI.md` / `CLAUDE.md`, and `.agents/agents/*.md`.
+2. **Fetch Live Provider Catalog:** Query the active provider's currently available models.
+3. **Cognitive Tier Rebalancing:** Using [`./references/dynamic-routing.md`](./references/dynamic-routing.md), evaluate each tier for newly released superior models, better reasoning/cost efficiency, or deprecated models. Keep unchanged any role whose current model remains optimal. Update modified `.md` files and sync `context/`.
+4. **Change Report:** Present a table listing **Agent / File**, **Previous ➔ Updated Model** *(or Unchanged)*, and **Technical Rationale**.
 
 ---
 
-## ACCIÓN 4: `skills` — Recomendación Híbrida (Skills Estándar + Búsqueda en Vivo)
+## ACTION 3: `stack` — Optional Stack Improvement Consulting
 
-Cuando el usuario invoque `/multi-agent-architect skills` (o pida recomendaciones de skills externas para su proyecto):
+When the user invokes `/multi-agent-architect stack`:
+1. **Comparative Diagnosis (Read-Only):** Analyze current tooling (package manager e.g. `npm` vs `pnpm`, type-checking strictness, linters, test runner, build scripts, security posture) and present a 3-column table: **Current Stack | Suggested Improvement | Technical Rationale**.
+2. **User Confirmation:** Ask whether to apply any suggested improvement or keep the current stack. Apply changes and sync `context/` **only** for explicitly approved items.
 
-1. **Capa 1 — Núcleo Estándar Universal:**
-   - Consulta [`./references/skills-estandar.md`](./references/skills-estandar.md) y selecciona **2 o 3 skills transversales** esenciales para el tipo de proyecto (ej. seguridad OWASP, TDD/debugging/review, testing E2E web, diseño UI o documentos).
-2. **Capa 2 — Búsqueda Dinámica en Internet (Específicas del Stack):**
-   - Identifica las tecnologías principales del proyecto (ej. Astro, Next.js, Rust, Go, Laravel, Flutter, Supabase, Prisma, Docker, Terraform) y busca en el ecosistema (`skills.sh`, `npx skills find <tecnología>` o GitHub) **2 o 3 skills específicas** activas y con buena adopción para esas tecnologías.
-3. **Presentación Unificada con Enlaces Oficiales:**
-   - Muestra ambas secciones claramente diferenciadas (**Skills Estándar Recomendadas** + **Skills Específicas para tu Stack**) indicando para cada una:
-     - **Nombre de la skill** y **por qué aporta valor a este proyecto**.
-     - **Enlace oficial verificado** (GitHub / `skills.sh`) para que el desarrollador pueda revisarla.
-     - **Comando de instalación adaptado al gestor actual del proyecto** (`npx skills add ...`, `pnpm dlx skills add ...` o `bunx skills add ...`).
-4. **Instalación Bajo Confirmación:**
-   - Instala únicamente las skills que el desarrollador pida expresamente (o cualquier otra que haya investigado por su cuenta) y sincroniza `context/arquitectura.md`.
+---
+
+## ACTION 4: `skills` — Hybrid Skill Recommendations
+
+When the user invokes `/multi-agent-architect skills`:
+1. **Layer 1 — Universal Core Skills:** Select 2–3 relevant cross-cutting skills from [`./references/core-skills.md`](./references/core-skills.md) (security/OWASP, TDD/debugging/review, E2E testing, UI/a11y, or docs/office workflows).
+2. **Layer 2 — Live Stack-Specific Search:** Search the ecosystem (`skills.sh`, `npx skills find <tech>`, GitHub) for 2–3 active, well-adopted skills tailored to the project's specific frameworks/languages. Verify repository legitimacy, recent commits, and adoption signals before recommending.
+3. **Structured Presentation:** Present both lists clearly with **Skill Name**, **Value for this Project**, **Official URL**, and **Install Command** adapted to the project's actual package manager (`npx`, `pnpm dlx`, or `bunx`).
+4. **Install Only on Confirmation:** Install external skills only after explicit user selection and record them in the Permanent Layer (`context/`).

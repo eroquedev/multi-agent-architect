@@ -1,8 +1,8 @@
-name: Standardized Skills Maintenance
+name: Core Skills Maintenance
 
 on:
   schedule:
-    # Se ejecuta automáticamente todos los domingos a las 09:00 UTC
+    # Runs automatically every Sunday at 09:00 UTC
     - cron: "0 9 * * 0"
   workflow_dispatch:
 
@@ -16,13 +16,15 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "20"
 
-      - name: Verify standardized skills and check for updates
+      - name: Verify core skills health and check updates
         id: check
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -42,7 +44,7 @@ jobs:
           script: |
             const fs = require('fs');
             const body = fs.readFileSync('maintenance-report.md', 'utf8');
-            const title = '[Skills Maintenance] Revisión semanal de vigencia y nuevas skills estándar';
+            const title = '[Skills Maintenance] Weekly core-skills health & updates report';
 
             const { data: issues } = await github.rest.issues.listForRepo({
               owner: context.repo.owner,
