@@ -42,8 +42,8 @@ Invoke the exact action you need via short command or natural language (the skil
 
 ```text
 your-project/
-├── AGENTS.md                      # Single source of truth (Full-Delegation + Auto-Sync)
-├── GEMINI.md / CLAUDE.md          # Thin provider adapter pointing to AGENTS.md
+├── AGENTS.md                      # Universal single source of truth (Full-Delegation + Auto-Sync)
+├── <PROVIDER>.md                  # Optional thin adapter when required by your tool (e.g. GEMINI.md, CLAUDE.md, .cursor/rules)
 ├── context/
 │   ├── architecture.md            # Permanent Layer (modules, schemas, contracts, env names)
 │   └── status-and-plan.md         # Ephemeral Layer (max 60 lines: progress, commit & backlog)

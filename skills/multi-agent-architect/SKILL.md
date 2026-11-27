@@ -2,12 +2,12 @@
 name: multi-agent-architect
 description: >-
   Use this skill to initialize, manage, or upgrade multi-agent orchestration,
-  dynamic 4-tier model routing, and Double-Layer Memory (AGENTS.md, GEMINI.md,
-  CLAUDE.md, context/, .agents/) in any project. Supports 4 independent actions:
-  (1) 'init' for uninterrupted single-pass setup respecting the current stack
-  and secret hygiene, (2) 'models' to audit and rebalance agent models when
-  newer models become available, (3) 'stack' to compare the current stack
-  against optional improvements, and (4) 'skills' for hybrid recommendations
+  dynamic 4-tier model routing, and Double-Layer Memory (AGENTS.md, provider
+  adapters, context/, .agents/) in any project regardless of AI provider. Supports
+  4 independent actions: (1) 'init' for uninterrupted single-pass setup respecting
+  the current stack and secret hygiene, (2) 'models' to audit and rebalance agent
+  models when newer models become available, (3) 'stack' to compare the current
+  stack against optional improvements, and (4) 'skills' for hybrid recommendations
   combining curated core engineering skills with live ecosystem search.
 license: MIT
 metadata:
@@ -56,7 +56,7 @@ Identify the requested action (via slash-style command or natural language) and 
    - Do **not** auto-install external community skills during `init`.
 4. **Subagents (`.agents/agents/`) & Single-Source Root Orchestration:**
    - Classify the live provider models into **4 Cognitive Tiers** per [`./references/dynamic-routing.md`](./references/dynamic-routing.md) and create only the needed specialist subagents (`system-architect`, `backend-specialist`, `data-specialist`, `platform-specialist`, `ui-ux-specialist`, `qa-auditor`, plus **`code-explorer`** on the lightest Tier 4 model), each declaring `model:` and `fallback_model:`.
-   - **Avoid Double Token Loading:** Write the complete orchestration rules, subagent matrix, and the **3 Autonomous Directives** inside **`AGENTS.md`** as the single source of truth, and keep **`GEMINI.md` / `CLAUDE.md`** as lightweight 5–8 line adapters pointing to `AGENTS.md` and `context/`:
+   - **Avoid Double Token Loading:** Write the complete orchestration rules, subagent matrix, and the **3 Autonomous Directives** inside **`AGENTS.md`** as the single source of truth. Only if the active AI tool requires its own entry file (e.g., `GEMINI.md`, `CLAUDE.md`, `.cursor/rules`), create a thin 5–8 line adapter pointing to `AGENTS.md` and `context/`:
      1. *Full-Delegation Orchestration* (Orchestrator plans/designs and delegates exploration to `@code-explorer` under a strict Exploration Budget).
      2. *Silent Context Recovery* (Orchestrator silently reads `context/` at task start or after chat history compaction).
      3. *Post-Task Auto-Sync* (`@code-explorer` automatically updates the Permanent Layer on structural/skill/agent changes and the Ephemeral Layer after each completed task).

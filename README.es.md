@@ -42,8 +42,8 @@ Invoca la acción que necesites mediante comando corto o lenguaje natural (la sk
 
 ```text
 tu-proyecto/
-├── AGENTS.md                      # Fuente única de verdad (Delegación Total + Auto-Sync)
-├── GEMINI.md / CLAUDE.md          # Adaptador ligero apuntando a AGENTS.md
+├── AGENTS.md                      # Fuente única universal (Delegación Total + Auto-Sync)
+├── <PROVEEDOR>.md                 # Adaptador ligero opcional si tu herramienta lo requiere (ej. GEMINI.md, CLAUDE.md, .cursor/rules)
 ├── context/
 │   ├── arquitectura.md            # Capa Permanente (módulos, esquemas, contratos, nombres env)
 │   └── estado-y-plan.md           # Capa Efímera (máx. 60 líneas: avances, commit y backlog)

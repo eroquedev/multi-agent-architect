@@ -11,7 +11,7 @@ To avoid loading identical instructions twice when an IDE/CLI reads both `AGENTS
   1. **Transparent Context Recovery:** *"At task start or whenever long chat history compacts, silently read `context/status-and-plan.md` and `context/architecture.md` (or localized equivalents) before planning."*
   2. **Post-Task Auto-Sync:** *"Upon completing any relevant task, automatically delegate to `@code-explorer` (Tier 4) to update the Permanent Layer (when structure, schemas, endpoints, dependencies, skills, or subagents change) and the Ephemeral Layer (recording progress, recommended commit, and next backlog items)."*
   3. **Automatic Quota Failover:** *"Each subagent declares `model:` and `fallback_model:`. On quota exhaustion, seamlessly fall back to `fallback_model:`."*
-- **`GEMINI.md` / `CLAUDE.md` (Thin 5–8 Line Adapter):** Points to `AGENTS.md` and `context/` plus any provider-specific directive only.
+- **Optional Provider Adapters (Thin 5–8 Line Pointer):** Only create a tool-specific adapter (e.g., `GEMINI.md`, `CLAUDE.md`, `.cursor/rules`) when required by the developer's active client, pointing directly to `AGENTS.md` and `context/`.
 
 ---
 
